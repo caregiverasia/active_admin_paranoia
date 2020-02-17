@@ -1,8 +1,8 @@
 module ActiveAdminParanoia
   module DSL
     def active_admin_paranoia
-      archived_at_column = @resource.paranoia_column
-      not_archived_value = @resource.paranoia_sentinel_value
+      archived_at_column = config.resource_class.paranoia_column
+      not_archived_value = config.resource_class.paranoia_sentinel_value
 
       do_archive = proc do |ids, resource_class, controller|
         resource_class.where(id: ids).destroy_all
