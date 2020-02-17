@@ -17,7 +17,7 @@ module ActiveAdminParanoia
 
       controller do
         def find_resource
-          resource_class.with_deleted.where(id: params[:id]).first!
+          resource_class.with_deleted.public_send(method_for_find, params[:id])
         end
       end
 
