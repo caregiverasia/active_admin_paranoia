@@ -7,7 +7,6 @@ module ActiveAdminParanoia
       do_archive = proc do |ids, resource_class, controller|
         resource_class.where(id: ids).destroy_all
         options = { notice: I18n.t('active_admin_paranoia.batch_actions.succesfully_archived', count: ids.count, model: resource_class.model_name, plural_model: resource_class.to_s.downcase.pluralize) }
-        # For more info, see here: https://github.com/rails/rails/pull/22506
         if Rails::VERSION::MAJOR >= 5
           controller.redirect_back({ fallback_location: ActiveAdmin.application.root_to }.merge(options))
         else
@@ -31,7 +30,6 @@ module ActiveAdminParanoia
       batch_action :restore, confirm: proc{ I18n.t('active_admin_paranoia.batch_actions.restore_confirmation', plural_model: resource_class.to_s.downcase.pluralize) }, if: proc{ authorized?(ActiveAdminParanoia::Auth::RESTORE, resource_class) && params[:scope] == 'archived' } do |ids|
         resource_class.restore(ids, recursive: true)
         options = { notice: I18n.t('active_admin_paranoia.batch_actions.succesfully_restored', count: ids.count, model: resource_class.model_name, plural_model: resource_class.to_s.downcase.pluralize) }
-        # For more info, see here: https://github.com/rails/rails/pull/22506
         if Rails::VERSION::MAJOR >= 5
           redirect_back({ fallback_location: ActiveAdmin.application.root_to }.merge(options))
         else
@@ -40,11 +38,11 @@ module ActiveAdminParanoia
       end
 
       action_item :archive, only: :show, if: proc { !resource.send(archived_at_column) } do
-        link_to(I18n.t('active_admin_paranoia.archive_model', model: resource_class.to_s.titleize), "#{resource_path(resource)}/archive", method: :put, data: { confirm: I18n.t('active_admin_paranoia.archive_confirmation') }) if authorized?(ActiveAdminParanoia::Auth::ARCHIVE, resource)
+        link_to(I18n.t('active_admin_paranoia.archive_model', model: resource_class.model_name), "#{resource_path(resource)}/archive", method: :put) if authorized?(ActiveAdminParanoia::Auth::ARCHIVE, resource)
       end
 
       action_item :restore, only: :show, if: proc { resource.send(archived_at_column) } do
-        link_to(I18n.t('active_admin_paranoia.restore_model', model: resource_class.to_s.titleize), "#{resource_path(resource)}/restore", method: :put, data: { confirm: I18n.t('active_admin_paranoia.restore_confirmation') }) if authorized?(ActiveAdminParanoia::Auth::RESTORE, resource)
+        link_to(I18n.t('active_admin_paranoia.restore_model', model: resource_class.model_name), "#{resource_path(resource)}/restore", method: :put) if authorized?(ActiveAdminParanoia::Auth::RESTORE, resource)
       end
 
       member_action :archive, method: :put, confirm: proc{ I18n.t('active_admin_paranoia.archive_confirmation') }, if: proc{ authorized?(ActiveAdminParanoia::Auth::ARCHIVE, resource_class) } do
@@ -54,7 +52,6 @@ module ActiveAdminParanoia
       member_action :restore, method: :put, confirm: proc{ I18n.t('active_admin_paranoia.restore_confirmation') }, if: proc{ authorized?(ActiveAdminParanoia::Auth::RESTORE, resource_class) } do
         resource.restore(recursive: true)
         options = { notice: I18n.t('active_admin_paranoia.batch_actions.succesfully_restored', count: 1, model: resource_class.model_name, plural_model: resource_class.to_s.downcase.pluralize) }
-        # For more info, see here: https://github.com/rails/rails/pull/22506
         if Rails::VERSION::MAJOR >= 5
           redirect_back({ fallback_location: ActiveAdmin.application.root_to }.merge(options))
         else
@@ -77,9 +74,7 @@ module ActiveAdmin
         def defaults(resource, options = {})
           if resource.respond_to?(:deleted?) && resource.deleted?
             if controller.action_methods.include?('restore') && authorized?(ActiveAdminParanoia::Auth::RESTORE, resource)
-              # TODO: find a way to use the correct path helper
-              item I18n.t('active_admin_paranoia.restore'), "#{resource_path(resource)}/restore", method: :put, class: "restore_link #{options[:css_class]}",
-                data: {confirm: I18n.t('active_admin_paranoia.restore_confirmation')}
+              item I18n.t('active_admin_paranoia.restore'), "#{resource_path(resource)}/restore", method: :put, class: "restore_link #{options[:css_class]}"
             end
           else
             orig_defaults(resource, options)
