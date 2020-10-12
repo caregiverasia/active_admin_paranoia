@@ -38,11 +38,11 @@ module ActiveAdminParanoia
       end
 
       action_item :archive, only: :show, if: proc { !resource.send(archived_at_column) } do
-        link_to(I18n.t('active_admin_paranoia.archive_model', model: resource_class.model_name), eval("archive_admin_#{resource_class.to_s.downcase}_path"), method: :put) if authorized?(ActiveAdminParanoia::Auth::ARCHIVE, resource)
+        link_to(I18n.t('active_admin_paranoia.archive_model', model: resource_class.model_name), send("archive_admin_#{resource_class.to_s.downcase}_path", resource), method: :put) if authorized?(ActiveAdminParanoia::Auth::ARCHIVE, resource)
       end
 
       action_item :restore, only: :show, if: proc { resource.send(archived_at_column) } do
-        link_to(I18n.t('active_admin_paranoia.restore_model', model: resource_class.model_name), eval("restore_admin_#{resource_class.to_s.downcase}_path"), method: :put) if authorized?(ActiveAdminParanoia::Auth::RESTORE, resource)
+        link_to(I18n.t('active_admin_paranoia.restore_model', model: resource_class.model_name), send("restore_admin_#{resource_class.to_s.downcase}_path", resource), method: :put) if authorized?(ActiveAdminParanoia::Auth::RESTORE, resource)
       end
 
       member_action :archive, method: :put, confirm: proc{ I18n.t('active_admin_paranoia.archive_confirmation') }, if: proc{ authorized?(ActiveAdminParanoia::Auth::ARCHIVE, resource_class) } do
@@ -74,7 +74,7 @@ module ActiveAdmin
         def defaults(resource, options = {})
           if resource.respond_to?(:deleted?) && resource.deleted?
             if controller.action_methods.include?('restore') && authorized?(ActiveAdminParanoia::Auth::RESTORE, resource)
-              item I18n.t('active_admin_paranoia.restore'), eval("restore_admin_#{resource_class.to_s.downcase}_path"), method: :put, class: "restore_link #{options[:css_class]}"
+              item I18n.t('active_admin_paranoia.restore'), send("restore_admin_#{resource_class.to_s.downcase}_path", resource), method: :put, class: "restore_link #{options[:css_class]}"
             end
           else
             orig_defaults(resource, options)
