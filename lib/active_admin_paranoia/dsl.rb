@@ -6,9 +6,7 @@ module ActiveAdminParanoia
 
       do_archive = proc do |ids, resource_class, controller|
         # destroy_all invokes deletion of its associations. We don't want that.
-        resource_class.where(id: ids).each do |r|
-          r.destroy
-        end
+        resource_class.where(id: ids).destroy_all
         options = { notice: I18n.t('active_admin_paranoia.batch_actions.succesfully_archived', count: ids.count, model: resource_class.model_name, plural_model: resource_class.to_s.downcase.pluralize) }
         if Rails::VERSION::MAJOR >= 5
           controller.redirect_back({ fallback_location: ActiveAdmin.application.root_to }.merge(options))
